@@ -7,9 +7,10 @@
  * (for more details see LICENSE)
  *
  */
- 
+
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 class AbstractObserver;
 
@@ -21,9 +22,14 @@ public:
         observerList.push_back(newObserver);
     }
 
-    void removeObserver (int index)
+    void removeObserver (AbstractObserver* observer)
     {
-        observerList.erase(observerList.begin() + index);
+        auto itr = std::find(observerList.begin(),
+                             observerList.end(),
+                             observer);
+
+        if (itr != observerList.end())
+            observerList.erase(itr);
     }
 
     void notifyObservers ();
@@ -36,6 +42,7 @@ private:
   std::vector <AbstractObserver*> observerList;
 };
 
+
 class ConcreteSubject : public AbstractSubject
 {
 public:
@@ -44,15 +51,14 @@ public:
         return subject_state;
     }
 
-    void setSubjectState(std::string s)
+    void setSubjectState(std::string state)
     {
-        subject_state = s;
+        subject_state = state;
     }
 
 private:
     std::string subject_state;
 };
-
 
 
 class AbstractObserver
@@ -62,6 +68,7 @@ public:
     virtual std::string getObserverState() = 0;
     virtual void updateObserverState (AbstractSubject* subject) = 0;
 };
+
 
 class ConcreteObserver : public AbstractObserver
 {
@@ -83,6 +90,7 @@ private:
   std::string observer_state;
 };
 
+
 void AbstractSubject::notifyObservers()
 {
     for (unsigned int i = 0; i < observerList.size(); i++)
@@ -91,6 +99,7 @@ void AbstractSubject::notifyObservers()
       observerList[i]->updateObserverState(this);
     }
 }
+
 
 // A Test Drive Application which loves frequent updates :)
 void turbulent ()
@@ -112,14 +121,13 @@ void turbulent ()
     std::cout << "STATE OF OBSERVER2: " << observer2.getObserverState() << std::endl;
     std::cout << std::endl;
 
-    subject->removeObserver(1);
-    subject->setSubjectState("SURPRISED");
+    subject->removeObserver(&observer1);
+    subject->setSubjectState("SAD");
     subject->notifyObservers();
 
     std::cout << "STATE OF OBSERVER1: " << observer1.getObserverState() << std::endl;
     std::cout << "STATE OF OBSERVER2: " << observer2.getObserverState() << std::endl;
 }
-
 
 
 int main()
